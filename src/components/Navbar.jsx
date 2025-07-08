@@ -362,7 +362,7 @@ const link1 = {
           onMouseLeave={() => handleLogoHover(false)}
         >
           <div style={logoIcon}>🇮🇳</div>
-           <a href="/" style={link}><span style={logoText}>AirQuality</span></a>
+           <Link to="/" sytle={link}><span style={logoText}>AQ-INDIA</span></Link>
         </div>
 
         {/* Desktop Navigation */}
@@ -370,14 +370,14 @@ const link1 = {
           <li
             style={live}
           >
-            <a href="/AirLiveData" style={link1}>
+            <Link to="/AirLiveData" style={link1}>
               See Live
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/" style={link}>
+            <Link to="/" style={link}>
               Dashboard
-            </a>
+            </Link>
           </li>
           
           {/* Ranking Cards */}
@@ -398,7 +398,7 @@ const link1 = {
             
             <div style={{ ...rankingCardsContainer, ...(rankingOpen && visibleCards) }}>
               {/* First Card */}
-              <a href="AQITables" style={{ textDecoration: 'none' }}>
+              <Link to="/AQITables" style={{ textDecoration: 'none' }}>
                 <div style={rankingCard}>
                   <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
                   <div style={cardContent}>
@@ -409,10 +409,10 @@ const link1 = {
                     </p>
                   </div>
                 </div>
-              </a>
+              </Link>
               
               {/* Second Card */}
-              <a href="AQITables2" style={{ textDecoration: 'none' }}>
+              <Link to="/AQITables2" style={{ textDecoration: 'none' }}>
               <div style={rankingCard}>
                 <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
                 <div style={cardContent}>
@@ -422,7 +422,7 @@ const link1 = {
                     Compare long-term air quality trends with our comprehensive historic data analysis.
                   </p>
                 </div>
-              </div></a>
+              </div></Link>
             </div>
           </li>
           
