@@ -398,7 +398,7 @@ const link1 = {
             
             <div style={{ ...rankingCardsContainer, ...(rankingOpen && visibleCards) }}>
               {/* First Card */}
-              <a href="/AQITables" style={{ textDecoration: 'none' }}>
+              <a href="/AQITables" style={link1}>
                 <div style={rankingCard}>
                   <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
                   <div style={cardContent}>
@@ -412,7 +412,7 @@ const link1 = {
               </a>
               
               {/* Second Card */}
-              <a href="/AQITables2" style={{ textDecoration: 'none' }}>
+              <a href="/AQITables2" style={link1}>
               <div style={rankingCard}>
                 <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
                 <div style={cardContent}>
