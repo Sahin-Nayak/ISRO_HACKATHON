@@ -11,7 +11,7 @@ function App() {
     <>
       <Navbar />
       <AQIBot />
-      <BrowserRouter>
+      {/* <BrowserRouter> */}
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/AQITables" element={<AQITables />} />
@@ -19,7 +19,7 @@ function App() {
         <Route path="/AirLiveData" element={<AirLiveData />} />
         {/* Add more routes as needed */}
       </Routes>
-      </BrowserRouter>
+      {/* </BrowserRouter> */}
     </>
   );
 }
