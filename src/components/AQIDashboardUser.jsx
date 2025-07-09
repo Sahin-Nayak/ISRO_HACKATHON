@@ -108,9 +108,9 @@ const AQIDashboardCompact = () => {
             >
               <span className="location-icon">📍</span>
               <h2>{aqiData.city.name}</h2>
-              <div className="timestamp">
+{/*               <div className="timestamp">
                 {new Date(aqiData.time.v * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </div>
+              </div> */}
             </motion.div>
           </div>
 
