@@ -1,9 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import { usePDF } from 'react-to-pdf';
+import { Bar, Line, Scatter } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const AQITable2 = () => {
-  const aqiData = [
-    {
+  const initialData = [
+{
 rank: 1,
 city: "New Delhi, India",
 avg: 95,
@@ -268,29 +293,135 @@ city: "Bhatpara, India",
 avg: 57,
 months: [158, 100, 60, 55, 25, 29, 16, 23, 22, 39, 76, 78]
 }
+    // ... rest of your data
   ];
 
-  const { toPDF, targetRef } = usePDF({filename: 'India-AQI-PM2.5-Rankings-2024.pdf'});
+  const [aqiData, setAqiData] = useState(initialData);
+  const [chartType, setChartType] = useState("bar");
+  const [showAllCities, setShowAllCities] = useState(false);
+  const [selectedCities, setSelectedCities] = useState([]);
+
+  const { toPDF, targetRef } = usePDF({
+    filename: 'India-AQI-PM2.5-Rankings-2024.pdf',
+    page: {
+      margin: 10,
+      format: 'a4',
+    }
+  });
 
   const getColor = (aqi) => {
     if (aqi > 300) return "hazardous";
-    if (aqi > 200 && aqi<300) return "severe";
-    if (aqi > 150 && aqi<200) return "unhealthy";
-    if (aqi > 100 && aqi<150) return "poor";
-    if (aqi > 50 && aqi<100) return "modarate";
+    if (aqi > 200) return "severe";
+    if (aqi > 150) return "unhealthy";
+    if (aqi > 100) return "poor";
+    if (aqi > 50) return "moderate";
     return "good";
   };
 
   const getCellStyle = (level) => {
     const styles = {
       "good": { backgroundColor: "#a8e05f", color: "#000" },
-      "modarate": { backgroundColor: "#FFFF00", color: "#000" },
+      "moderate": { backgroundColor: "#fdd64b", color: "#000" },
       "poor": { backgroundColor: "#fe9b57", color: "#000" },
       "unhealthy": { backgroundColor: "#fe6a69", color: "#fff" },
       "severe": { backgroundColor: "#a97abc", color: "#fff" },
       "hazardous": { backgroundColor: "#a87383", color: "#fff" },
     };
     return styles[level] || {};
+  };
+
+  const getChartColor = (aqi) => {
+    if (aqi > 300) return "#880E4F";
+    if (aqi > 200) return "#9C27B0";
+    if (aqi > 150) return "#F44336";
+    if (aqi > 100) return "#FF9800";
+    if (aqi > 50) return "#FFC107";
+    return "#4CAF50";
+  };
+
+  // Prepare data for charts
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  // Cities to display in charts
+  const chartCities = showAllCities ? aqiData : 
+    selectedCities.length > 0 ? 
+      aqiData.filter(city => selectedCities.includes(city.city)) : 
+      aqiData.slice(0, 5);
+
+  const barChartData = {
+    labels: chartCities.map(city => city.city.split(",")[0]),
+    datasets: [{
+      label: 'Average PM2.5 (µg/m³)',
+      data: chartCities.map(city => city.avg),
+      backgroundColor: chartCities.map(city => getChartColor(city.avg)),
+      borderColor: chartCities.map(city => getChartColor(city.avg)),
+      borderWidth: 1,
+    }]
+  };
+
+  const lineChartData = {
+    labels: months,
+    datasets: chartCities.map(city => ({
+      label: city.city.split(",")[0],
+      data: city.months,
+      borderColor: getChartColor(city.avg),
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      tension: 0.3,
+      fill: true,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    }))
+  };
+
+  const scatterChartData = {
+    datasets: aqiData.map(city => ({
+      label: city.city.split(",")[0],
+      data: city.months.map((value, index) => ({
+        x: index + 1,
+        y: value
+      })),
+      backgroundColor: getChartColor(city.avg),
+      borderColor: getChartColor(city.avg),
+    }))
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${context.raw.y || context.raw} µg/m³ (${getColor(context.raw.y || context.raw).toUpperCase()})`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: false,
+        title: {
+          display: true,
+          text: 'PM2.5 (µg/m³)'
+        }
+      },
+      x: chartType === 'scatter' ? {
+        title: {
+          display: true,
+          text: 'Month (1-12)'
+        }
+      } : {}
+    }
+  };
+
+  const toggleCitySelection = (city) => {
+    if (selectedCities.includes(city)) {
+      setSelectedCities(selectedCities.filter(c => c !== city));
+    } else {
+      setSelectedCities([...selectedCities, city]);
+    }
   };
 
   const thStyle = {
@@ -306,6 +437,7 @@ months: [158, 100, 60, 55, 25, 29, 16, 23, 22, 39, 76, 78]
     textAlign: "center",
     fontWeight: "bold",
   };
+
   const tdStyle1 = {
     backgroundColor: "#22272C",
     color: "white",
@@ -319,9 +451,69 @@ months: [158, 100, 60, 55, 25, 29, 16, 23, 22, 39, 76, 78]
     <div style={{ background: "#22272C", padding: "2rem", color: "white", fontFamily: "sans-serif" }}>
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'flex-end', 
-        marginBottom: '20px'
+        justifyContent: 'space-between', 
+        marginBottom: '20px',
+        gap: '10px',
+        flexWrap: 'wrap'
       }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => setChartType("bar")} 
+            style={{
+              background: chartType === "bar" ? '#3b82f6' : '#4B5563',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+            }}
+          >
+            Bar Chart
+          </button>
+          <button 
+            onClick={() => setChartType("line")} 
+            style={{
+              background: chartType === "line" ? '#3b82f6' : '#4B5563',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+            }}
+          >
+            Line Chart
+          </button>
+          <button 
+            onClick={() => setChartType("scatter")} 
+            style={{
+              background: chartType === "scatter" ? '#3b82f6' : '#4B5563',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+            }}
+          >
+            Scatter Plot
+          </button>
+          <button 
+            onClick={() => setShowAllCities(!showAllCities)} 
+            style={{
+              background: showAllCities ? '#10b981' : '#4B5563',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+            }}
+          >
+            {showAllCities ? 'Show Top 5' : 'Show All Cities'}
+          </button>
+        </div>
         <button 
           onClick={() => toPDF()} 
           style={{
@@ -332,75 +524,215 @@ months: [158, 100, 60, 55, 25, 29, 16, 23, 22, 39, 76, 78]
             borderRadius: '5px',
             cursor: 'pointer',
             fontWeight: 'bold',
-            fontSize: '1rem',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            transition: 'all 0.3s ease',
           }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
             <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
             <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
           </svg>
-          Download as PDF
+          Download PDF
         </button>
       </div>
 
       <div ref={targetRef}>
         <header style={{ 
-          background: 'linear-gradient(90deg,rgb(126, 32, 115),rgb(142, 117, 255))',
+          background: 'linear-gradient(90deg, #1a365d, #153e75)',
           textAlign: 'center',
           marginBottom: '30px',
           padding: '25px 0',
-          borderBottom: '1px solid #334155'
+          borderRadius: '10px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
         }}>
           <h1 style={{ 
             fontSize: '2.8rem', 
             margin: '0 0 12px 0',
             fontWeight: '800',
-            background: 'linear-gradient(90deg, #3b82f6, #10b981)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px'
+            color: 'white',
+            letterSpacing: '-0.5px',
           }}>
-            India's AQI Rankings 2024 Based on PM 2.5
+            India's PM2.5 Air Quality Rankings 2024
           </h1>
           <p style={{
-            color: 'white',
+            color: 'rgba(255, 255, 255, 0.8)',
             maxWidth: '800px',
             margin: '0 auto',
             lineHeight: '1.7',
             fontSize: '1.1rem'
           }}>
-            2024 air quality monitoring across major Indian cities. 
+            Particulate Matter (PM2.5) concentrations in µg/m³ across major Indian cities
           </p>
         </header>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Rank</th>
-                <th style={thStyle}>City</th>
-                <th style={thStyle}>2024 Avg</th>
-                {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((month) => (
-                  <th key={month} style={thStyle}>{month}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {aqiData.map((row, idx) => (
-                <tr key={idx}>
-                  <td style={tdStyle1}>{row.rank}</td>
-                  <td style={tdStyle1}>🇮🇳 {row.city}</td>
-                  <td style={{ ...tdStyle, ...getCellStyle(getColor(row.avg)) }}>{row.avg}</td>
-                  {row.months.map((val, i) => (
-                    <td key={i} style={{ ...tdStyle, ...getCellStyle(getColor(val)) }}>{val}</td>
+
+        {/* Summary Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '20px',
+          marginBottom: '30px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ margin: '0 0 10px 0', color: 'white' }}>Best Air Quality</h3>
+            <p style={{ fontSize: '1.5rem', margin: '0', fontWeight: 'bold', color: 'white' }}>
+              {aqiData[aqiData.length - 1].city.split(",")[0]} - {aqiData[aqiData.length - 1].avg} µg/m³
+            </p>
+          </div>
+          
+          <div style={{
+            background: 'linear-gradient(135deg, #F44336, #C62828)',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ margin: '0 0 10px 0', color: 'white' }}>Worst Air Quality</h3>
+            <p style={{ fontSize: '1.5rem', margin: '0', fontWeight: 'bold', color: 'white' }}>
+              {aqiData[0].city.split(",")[0]} - {aqiData[0].avg} µg/m³
+            </p>
+          </div>
+          
+          <div style={{
+            background: 'linear-gradient(135deg, #FF9800, #EF6C00)',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ margin: '0 0 10px 0', color: 'white' }}>National Average</h3>
+            <p style={{ fontSize: '1.5rem', margin: '0', fontWeight: 'bold', color: 'white' }}>
+              {Math.round(aqiData.reduce((sum, city) => sum + city.avg, 0) / aqiData.length)} µg/m³
+            </p>
+          </div>
+        </div>
+
+        {/* City Selection */}
+        {!showAllCities && (
+          <div style={{
+            backgroundColor: '#2D3748',
+            padding: '15px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ marginTop: '0', marginBottom: '10px' }}>Select Cities to Display</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+              {aqiData.map(city => (
+                <button
+                  key={city.city}
+                  onClick={() => toggleCitySelection(city.city)}
+                  style={{
+                    background: selectedCities.includes(city.city) ? '#3b82f6' : '#4B5563',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 12px',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  {city.city.split(",")[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Charts Section */}
+        <div style={{
+          backgroundColor: '#2D3748',
+          padding: '20px',
+          borderRadius: '10px',
+          marginBottom: '40px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          <h2 style={{ marginTop: '0', color: 'white' }}>
+            {chartType === 'bar' && 'Average PM2.5 by City'}
+            {chartType === 'line' && 'Monthly PM2.5 Trends'}
+            {chartType === 'scatter' && 'PM2.5 Distribution by Month'}
+          </h2>
+          <div style={{ height: '500px' }}>
+            {chartType === 'bar' && <Bar data={barChartData} options={chartOptions} />}
+            {chartType === 'line' && <Line data={lineChartData} options={chartOptions} />}
+            {chartType === 'scatter' && <Scatter data={scatterChartData} options={chartOptions} />}
+          </div>
+        </div>
+
+        {/* AQI Legend */}
+        <div style={{
+          backgroundColor: '#2D3748',
+          padding: '15px',
+          borderRadius: '8px',
+          marginBottom: '30px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: '15px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '20px', height: '20px', backgroundColor: '#4CAF50', borderRadius: '4px' }}></div>
+            <span>Good (0-50 µg/m³)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '20px', height: '20px', backgroundColor: '#FFC107', borderRadius: '4px' }}></div>
+            <span>Moderate (51-100 µg/m³)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '20px', height: '20px', backgroundColor: '#FF9800', borderRadius: '4px' }}></div>
+            <span>Poor (101-150 µg/m³)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '20px', height: '20px', backgroundColor: '#F44336', borderRadius: '4px' }}></div>
+            <span>Unhealthy (151-200 µg/m³)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '20px', height: '20px', backgroundColor: '#9C27B0', borderRadius: '4px' }}></div>
+            <span>Severe (201-300 µg/m³)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '20px', height: '20px', backgroundColor: '#880E4F', borderRadius: '4px' }}></div>
+            <span>Hazardous (300+ µg/m³)</span>
+          </div>
+        </div>
+
+        {/* Data Table */}
+        <div style={{ 
+          backgroundColor: '#2D3748',
+          padding: '20px',
+          borderRadius: '10px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          <h2 style={{ marginTop: '0', color: 'white' }}>Complete PM2.5 Data (µg/m³)</h2>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Rank</th>
+                  <th style={thStyle}>City</th>
+                  <th style={thStyle}>2024 Avg</th>
+                  {months.map((month) => (
+                    <th key={month} style={thStyle}>{month}</th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {aqiData.map((row, idx) => (
+                  <tr key={idx}>
+                    <td style={tdStyle1}>{row.rank}</td>
+                    <td style={tdStyle1}>🇮🇳 {row.city}</td>
+                    <td style={{ ...tdStyle, ...getCellStyle(getColor(row.avg)) }}>{row.avg}</td>
+                    {row.months.map((val, i) => (
+                      <td key={i} style={{ ...tdStyle, ...getCellStyle(getColor(val)) }}>{val}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
