@@ -119,10 +119,10 @@ const AirPollutionLiveBySearch = () => {
   return (
     <div className="air-pollution-app">
       <div className="dashboard-container">
-        <header className="dashboard-header">
+        {/* <header className="dashboard-header">
           <h1>Check Live Air Quality </h1>
           <p>Check real-time air pollution levels anywhere in the world</p>
-        </header>
+        </header> */}
 
         <div className="search-card">
           <form onSubmit={fetchAirQualityData} className="search-form">
@@ -132,7 +132,7 @@ const AirPollutionLiveBySearch = () => {
                 name="city"
                 value={location.city}
                 onChange={handleInputChange}
-                placeholder="Enter city name (e.g. Delhi)"
+                placeholder="Check Live Air Quality....... Enter city name (e.g. Delhi)"
                 className="search-input"
               />
               <button 
@@ -146,16 +146,6 @@ const AirPollutionLiveBySearch = () => {
                   'Search'
                 )}
               </button>
-            </div>
-            <div className="form-group">
-              <input
-                type="text"
-                name="stationId"
-                value={location.stationId}
-                onChange={handleInputChange}
-                placeholder="Or enter station ID"
-                className="search-input secondary"
-              />
               <button 
                 type="button" 
                 className="location-button"
@@ -165,6 +155,17 @@ const AirPollutionLiveBySearch = () => {
                 <span className="location-icon">📍</span> My Location
               </button>
             </div>
+            {/* <div className="form-group">
+              <input
+                type="text"
+                name="stationId"
+                value={location.stationId}
+                onChange={handleInputChange}
+                placeholder="Or enter station ID"
+                className="search-input secondary"
+              />
+              
+            </div> */}
           </form>
         </div>
 
@@ -282,11 +283,12 @@ const AirPollutionLiveBySearch = () => {
 
       <style jsx>{`
         .air-pollution-app {
-          min-height: 20vh;
-          background: #0f172a;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          color: #2d3748;
-        }
+  min-height: 20vh;
+  background: linear-gradient(to right, #0f172a, #1a2e35, #1f3b3a, #293e3f);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #e2e8f0; /* Soft light-gray for contrast */
+}
+
 
         .dashboard-container {
           max-width: 1200px;
@@ -317,10 +319,10 @@ const AirPollutionLiveBySearch = () => {
         }
 
         .search-card {
-          background: white;
+          // background: white;
           border-radius: 12px;
-          padding: 25px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          padding-top: 50px;
+          // box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
           margin-bottom: 20px;
         }
 
@@ -336,13 +338,40 @@ const AirPollutionLiveBySearch = () => {
         }
 
         .search-input {
-          flex: 1;
-          padding: 12px 15px;
-          border: 2px solid #e2e8f0;
-          border-radius: 8px;
-          font-size: 1rem;
-          transition: all 0.2s;
-        }
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid rgb(255, 52, 52);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  
+  /* Neon Glow Effect */
+  box-shadow: 
+    0 0 5px rgba(255, 52, 52, 0.5),
+    0 0 10px rgba(255, 52, 52, 0.3),
+    0 0 15px rgba(255, 52, 52, 0.2),
+    0 0 20px rgba(255, 52, 52, 0.1);
+  
+  /* Optional: Pulsing Animation */
+  animation: neon-pulse 2s infinite alternate;
+}
+
+@keyframes neon-pulse {
+  from {
+    box-shadow:
+      0 0 5px rgba(255, 52, 52, 0.5),
+      0 0 10px rgba(255, 52, 52, 0.3),
+      0 0 15px rgba(255, 52, 52, 0.2),
+      0 0 20px rgba(255, 52, 52, 0.1);
+  }
+  to {
+    box-shadow:
+      0 0 10px rgba(255, 52, 52, 0.8),
+      0 0 20px rgba(255, 52, 52, 0.5),
+      0 0 30px rgba(255, 52, 52, 0.3),
+      0 0 40px rgba(255, 52, 52, 0.2);
+  }
+}
 
         .search-input:focus {
           outline: none;
