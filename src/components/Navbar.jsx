@@ -1,67 +1,33 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [rankingOpen, setRankingOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
-  const [ipAddress, setIpAddress] = useState(null);
-  const [loadingLocation, setLoadingLocation] = useState(true);
-  // const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    
-    fetchUserLocation();
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
-  const fetchUserLocation = async () => {
-    setLoadingLocation(true);
-    try {
-      // Get IP address
-      const ipResponse = await axios.get('https://api.ipify.org?format=json');
-      const ip = ipResponse.data.ip;
-      setIpAddress(ip);
-      
-      // Get location details
-      const locationResponse = await axios.get(`https://ipapi.co/${ip}/json/`);
-      setUserLocation({
-        city: locationResponse.data.city,
-        region: locationResponse.data.region,
-        country: locationResponse.data.country_name,
-        countryCode: locationResponse.data.country_code,
-        timezone: locationResponse.data.timezone,
-        lat: locationResponse.data.latitude,
-        lon: locationResponse.data.longitude
-      });
-    } catch (error) {
-      console.error("Error fetching location:", error);
-      try {
-        // Fallback API
-        const fallbackResponse = await axios.get('https://geolocation-db.com/json/');
-        setUserLocation({
-          city: fallbackResponse.data.city,
-          region: fallbackResponse.data.state,
-          country: fallbackResponse.data.country_name,
-          countryCode: fallbackResponse.data.country_code,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          lat: fallbackResponse.data.latitude,
-          lon: fallbackResponse.data.longitude
-        });
-        setIpAddress(fallbackResponse.data.IPv4);
-      } catch (fallbackError) {
-        console.error("Fallback location fetch failed:", fallbackError);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 992);
+      if (window.innerWidth >= 992) {
+        setMenuOpen(false);
       }
-    } finally {
-      setLoadingLocation(false);
-    }
-  };
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Container Styles
   const navContainerStyles = {
@@ -76,7 +42,7 @@ const Navbar = () => {
     backdropFilter: 'blur(16px) saturate(180%)',
     WebkitBackdropFilter: 'blur(16px) saturate(180%)',
     color: '#fff',
-    padding: '20px 5%',
+    padding: isMobile ? '16px 1.5rem' : '20px 5%',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -84,7 +50,7 @@ const Navbar = () => {
     transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
     boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.3)' : 'none',
     borderBottom: scrolled ? '1px solid rgba(255, 153, 51, 0.3)' : '1px solid rgba(255,255,255,0.08)',
-    height: '48px',
+    height: isMobile ? 'auto' : '48px',
     position: 'relative',
   };
 
@@ -98,7 +64,7 @@ const Navbar = () => {
   };
 
   const logoText = {
-    fontSize: '1.7rem',
+    fontSize: isMobile ? '1.4rem' : '1.7rem',
     fontWeight: '700',
     background: 'linear-gradient(90deg, #FF9933, #FFFFFF, #138808)',
     WebkitBackgroundClip: 'text',
@@ -110,15 +76,15 @@ const Navbar = () => {
   };
 
   const logoIcon = {
-    width: '42px',
-    height: '42px',
+    width: isMobile ? '36px' : '42px',
+    height: isMobile ? '36px' : '42px',
     borderRadius: '10px',
     background: 'rgba(255, 153, 51, 0.1)',
     border: '1px solid rgba(255, 153, 51, 0.3)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '20px',
+    fontSize: isMobile ? '18px' : '20px',
     color: '#FF9933',
     boxShadow: '0 0 10px rgba(255, 153, 51, 0.2)',
     transition: 'all 0.3s ease',
@@ -126,8 +92,8 @@ const Navbar = () => {
   };
 
   const navLinks = {
-    display: 'flex',
-    gap: '2.5rem',
+    display: isMobile ? 'none' : 'flex',
+    gap: isMobile ? '1.5rem' : '2.5rem',
     listStyle: 'none',
     alignItems: 'center',
     margin: 0,
@@ -141,7 +107,7 @@ const Navbar = () => {
     position: 'relative',
     transition: 'all 0.3s ease',
     fontWeight: '500',
-    fontSize: '1.05rem',
+    fontSize: isMobile ? '1rem' : '1.05rem',
     letterSpacing: '0.3px',
     zIndex: 1002,
   };
@@ -152,16 +118,19 @@ const Navbar = () => {
     left: '50%',
     transform: 'translateX(-50%)',
     display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
     gap: '20px',
     opacity: 0,
     visibility: 'hidden',
     transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
     zIndex: 1003,
+    width: isMobile ? 'calc(100vw - 3rem)' : 'auto',
+    padding: isMobile ? '0 1.5rem' : '0',
   };
 
   const rankingCard = {
-    width: '280px',
-    height: '180px',
+    width: isMobile ? '100%' : '280px',
+    height: isMobile ? 'auto' : '180px',
     background: 'rgba(20, 24, 28, 0.98)',
     backdropFilter: 'blur(20px)',
     borderRadius: '12px',
@@ -170,6 +139,7 @@ const Navbar = () => {
     border: '1px solid rgba(255,255,255,0.05)',
     position: 'relative',
     overflow: 'hidden',
+    minWidth: isMobile ? '0' : '280px',
   };
 
   const cardBackground = {
@@ -195,7 +165,7 @@ const Navbar = () => {
   };
 
   const cardTitle = {
-    fontSize: '1.4rem',
+    fontSize: isMobile ? '1.2rem' : '1.4rem',
     fontWeight: '600',
     color: '#FF9933',
     textShadow: '0 0 8px rgba(255, 153, 51, 0.3)',
@@ -209,7 +179,7 @@ const Navbar = () => {
   };
 
   const cardDescription = {
-    fontSize: '0.95rem',
+    fontSize: isMobile ? '0.9rem' : '0.95rem',
     color: 'rgba(255,255,255,0.8)',
     lineHeight: '1.5',
   };
@@ -225,12 +195,13 @@ const Navbar = () => {
     flexDirection: 'column',
     position: 'fixed',
     right: '1.5rem',
-    top: '6rem',
+    top: isMobile ? '5rem' : '5.5rem',
     background: 'rgba(20, 24, 28, 0.98)',
     backdropFilter: 'blur(25px)',
     padding: '1.5rem',
     borderRadius: '16px',
-    width: '300px',
+    width: 'calc(100% - 3rem)',
+    maxWidth: '350px',
     boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
     gap: '1.2rem',
     zIndex: 1003,
@@ -240,7 +211,9 @@ const Navbar = () => {
 
   const hamburger = {
     fontSize: '1.8rem',
-    display: 'none',
+    display: isMobile ? 'flex' : 'none',
+    alignItems: 'center',
+    justifyContent: 'center',
     color: '#fff',
     cursor: 'pointer',
     transition: 'transform 0.3s ease',
@@ -249,6 +222,8 @@ const Navbar = () => {
     borderRadius: '8px',
     background: menuOpen ? 'rgba(255, 153, 51, 0.1)' : 'transparent',
     zIndex: 1002,
+    width: '44px',
+    height: '44px',
   };
 
   const dropdownTrigger = {
@@ -269,19 +244,6 @@ const Navbar = () => {
     borderRadius: '20px',
     border: '1px solid rgba(255, 153, 51, 0.3)',
     fontSize: '1rem',
-    transition: 'all 0.3s ease',
-    zIndex: 1002,
-  };
-
-  const locationBadge = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    background: 'rgba(255,255,255,0.05)',
-    padding: '8px 14px',
-    borderRadius: '20px',
-    border: '1px solid rgba(255, 153, 51, 0.3)',
-    fontSize: '0.9rem',
     transition: 'all 0.3s ease',
     zIndex: 1002,
   };
@@ -318,25 +280,35 @@ const Navbar = () => {
   };
 
   const live = {
-  display: 'inline-block',
-  margin: '0 10px',
-  padding: '8px 15px',
-  backgroundColor: 'red',
-  borderRadius: '4px',
-  transition: 'all 0.3s ease',
-  ':hover': {
-    backgroundColor: '#2563eb',
-    transform: 'translateY(-2px)'
-  }
-};
+    display: 'inline-block',
+    margin: '0 10px',
+    padding: '8px 15px',
+    backgroundColor: 'red',
+    borderRadius: '4px',
+    transition: 'all 0.3s ease',
+    ':hover': {
+      backgroundColor: '#2563eb',
+      transform: 'translateY(-2px)'
+    }
+  };
 
-const link1 = {
-  color: 'white',
-  textDecoration: 'none',
-  fontWeight: '500',
-  fontSize: '14px'
-};
+  const link1 = {
+    color: 'white',
+    textDecoration: 'none',
+    fontWeight: '500',
+    fontSize: '14px'
+  };
 
+  const mobileLink = {
+    color: 'rgba(255,255,255,0.9)',
+    textDecoration: 'none',
+    transition: 'all 0.3s ease',
+    fontWeight: '500',
+    fontSize: '1.05rem',
+    padding: '0.5rem 0',
+    display: 'block',
+    width: '100%'
+  };
 
   const handleLogoHover = (isHovering) => {
     const logo = document.querySelector('.logo-box');
@@ -362,14 +334,12 @@ const link1 = {
           onMouseLeave={() => handleLogoHover(false)}
         >
           <div style={logoIcon}>🇮🇳</div>
-           <Link to="/" sytle={link}><span style={logoText}>AQ-INDIA</span></Link>
+          <Link to="/" style={link}><span style={logoText}>AQ-INDIA</span></Link>
         </div>
 
         {/* Desktop Navigation */}
         <ul style={navLinks} className="desktop-nav">
-          <li
-            style={live}
-          >
+          <li style={live}>
             <Link to="/AirLiveData" style={link1}>
               See Live Map
             </Link>
@@ -383,10 +353,14 @@ const link1 = {
           {/* Ranking Cards */}
           <li 
             style={{ position: 'relative' }}
-            onMouseEnter={() => setRankingOpen(true)}
-            onMouseLeave={() => setRankingOpen(false)}
+            onMouseEnter={() => !isMobile && setRankingOpen(true)}
+            onMouseLeave={() => !isMobile && setRankingOpen(false)}
           >
-            <div style={dropdownTrigger} className="dropdown-trigger">
+            <div 
+              style={dropdownTrigger} 
+              className="dropdown-trigger"
+              onClick={() => isMobile && setRankingOpen(!rankingOpen)}
+            >
               <span style={link}>Ranking</span>
               <span style={{ 
                 transition: 'all 0.3s ease', 
@@ -394,7 +368,6 @@ const link1 = {
                 fontSize: '1.2rem'
               }}>▾</span>
             </div>
-            
             
             <div style={{ ...rankingCardsContainer, ...(rankingOpen && visibleCards) }}>
               {/* First Card */}
@@ -413,16 +386,17 @@ const link1 = {
               
               {/* Second Card */}
               <Link to="/AQITables2" style={{ textDecoration: 'none' }}>
-              <div style={rankingCard}>
-                <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
-                <div style={cardContent}>
-                  <h3 style={cardTitle}>Historic AQI Ranking Based On PM 2.5</h3>
-                  <div style={cardDivider} />
-                  <p style={cardDescription}>
-                    Compare long-term air quality trends with our comprehensive historic data analysis.
-                  </p>
+                <div style={rankingCard}>
+                  <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
+                  <div style={cardContent}>
+                    <h3 style={cardTitle}>Historic AQI Ranking Based On PM 2.5</h3>
+                    <div style={cardDivider} />
+                    <p style={cardDescription}>
+                      Compare long-term air quality trends with our comprehensive historic data analysis.
+                    </p>
+                  </div>
                 </div>
-              </div></Link>
+              </Link>
             </div>
           </li>
           
@@ -434,15 +408,6 @@ const link1 = {
             </div>
           </li>
           
-          {/* Location Display */}
-          {userLocation && (
-            <li>
-              <div style={locationBadge} className="location-badge">
-                <span>{userLocation.city}, {userLocation.country}</span>
-              </div>
-            </li>
-          )}
-
           {/* AQI Standard with Indian Flag */}
           <li>
             <div style={aqiBadge} className="aqi-badge">
@@ -462,73 +427,78 @@ const link1 = {
         </div>
 
         {/* Mobile Menu */}
-        <div style={mobileMenu} className="mobile-menu">
-          <a href="#" style={link}>Dashboard</a>
+        {isMobile && (
+          <div style={mobileMenu} className="mobile-menu">
+            <Link to="/" style={mobileLink} onClick={() => setMenuOpen(false)}>Dashboard</Link>
+            
+            <Link to="/AirLiveData" style={{ ...mobileLink, color: 'white', backgroundColor: 'red', padding: '10px 15px', borderRadius: '4px', textAlign: 'center' }} onClick={() => setMenuOpen(false)}>
+              See Live Map
+            </Link>
 
-          <div style={{ position: 'relative' }}>
-            <div 
-              style={{ ...link, ...dropdownTrigger }}
-              onClick={() => setRankingOpen(!rankingOpen)}
-              className="mobile-dropdown-trigger"
-            >
-              Ranking <span style={{ 
-                display: 'inline-block', 
-                transform: rankingOpen ? 'rotate(180deg)' : 'rotate(0)', 
-                transition: 'transform 0.3s',
-                fontSize: '1.2rem'
-              }}>▾</span>
-            </div>
-            <div style={{ 
-              display: rankingOpen ? 'flex' : 'none',
-              flexDirection: 'column',
-              gap: '15px',
-              marginTop: '0.8rem',
-              width: '100%'
-            }}>
-              <div style={{ ...rankingCard, width: '100%', height: 'auto' }}>
-                <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
-                <div style={cardContent}>
-                  <h3 style={cardTitle}>2024 City Ranking</h3>
-                  <div style={cardDivider} />
-                  <p style={cardDescription}>
-                    Explore the latest air quality rankings for cities worldwide based on 2024 data.
-                  </p>
-                </div>
+            <div style={{ position: 'relative' }}>
+              <div 
+                style={{ ...mobileLink, ...dropdownTrigger, marginBottom: '0.5rem' }}
+                onClick={() => setRankingOpen(!rankingOpen)}
+                className="mobile-dropdown-trigger"
+              >
+                Ranking <span style={{ 
+                  display: 'inline-block', 
+                  transform: rankingOpen ? 'rotate(180deg)' : 'rotate(0)', 
+                  transition: 'transform 0.3s',
+                  fontSize: '1.2rem'
+                }}>▾</span>
               </div>
-              
-              <div style={{ ...rankingCard, width: '100%', height: 'auto' }}>
-                <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
-                <div style={cardContent}>
-                  <h3 style={cardTitle}>Historic AQI Ranking</h3>
-                  <div style={cardDivider} />
-                  <p style={cardDescription}>
-                    Compare long-term air quality trends with our comprehensive historic data analysis.
-                  </p>
-                </div>
+              <div style={{ 
+                display: rankingOpen ? 'flex' : 'none',
+                flexDirection: 'column',
+                gap: '15px',
+                marginTop: '0.8rem',
+                width: '100%'
+              }}>
+                <Link to="/AQITables" className="img-rankings" style={{ textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>
+                  <div style={{ ...rankingCard, width: '100%', height: 'auto', marginBottom: '1rem' }}>
+                    <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
+                    <div style={cardContent}>
+                      <h3 style={cardTitle}>2024 City Ranking</h3>
+                      <div style={cardDivider} />
+                      <p style={cardDescription}>
+                        Explore the latest air quality rankings for cities worldwide based on 2024 data.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+                
+                <Link to="/AQITables2" className="img-rankings" style={{ textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>
+                  <div style={{ ...rankingCard, width: '100%', height: 'auto' }}>
+                    <div style={{ ...cardBackground, backgroundImage: 'url(https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60)' }} />
+                    <div style={cardContent}>
+                      <h3 style={cardTitle}>Historic AQI Ranking</h3>
+                      <div style={cardDivider} />
+                      <p style={cardDescription}>
+                        Compare long-term air quality trends with our comprehensive historic data analysis.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
               </div>
             </div>
-          </div>
-          
-          {userLocation && (
-            <div style={locationBadge} className="mobile-location-badge">
-              <span>{userLocation.city}, {userLocation.country}</span>
+            
+            <div style={languageLabel}>
+              <span style={{ ...mobileLink, ...preferredLanguageText }}>Preferred Language</span>
+              <span style={mobileLink}>English</span>
             </div>
-          )}
-          
-          <div style={languageLabel}>
-            <span style={{ ...link, ...preferredLanguageText }}>Preferred Language</span>
-            <span style={link}>English</span>
+            
+            <div style={aqiBadge} className="mobile-aqi-badge">
+              <span>AQI Standard</span>
+              <div style={flagStripes}></div>
+            </div>
           </div>
-          
-          <div style={aqiBadge} className="mobile-aqi-badge">
-            <span>AQI Standard</span>
-            <div style={flagStripes}></div>
-          </div>
-        </div>
+        )}
       </nav>
 
       {/* Global Styles */}
       <style jsx global>{`
+      
         @keyframes slideIn {
           from { opacity: 0; transform: translateY(-15px); }
           to { opacity: 1; transform: translateY(0); }
@@ -642,8 +612,7 @@ const link1 = {
           animation: pulse 2s infinite;
         }
         
-        .aqi-badge:hover,
-        .location-badge:hover {
+        .aqi-badge:hover {
           animation: float 3s ease-in-out infinite;
           background: rgba(255, 153, 51, 0.1);
         }
@@ -652,41 +621,62 @@ const link1 = {
           animation: pulse 1s infinite;
         }
         
-        @media (max-width: 768px) {
+        .mobile-menu a:hover {
+          color: #FF9933;
+          transform: translateX(5px);
+        }
+        
+        .mobile-aqi-badge:hover {
+          background: rgba(255, 153, 51, 0.1);
+        }
+        
+        @media (max-width: 1200px) {
+          .desktop-nav {
+            gap: 1.8rem;
+          }
+        }
+        
+        @media (max-width: 992px) {
           .desktop-nav {
             display: none;
           }
           
           .hamburger {
             display: flex;
-            align-items: center;
-            justify-content: center;
+          }
+
+          .img-rankings{
+            width:310px;}
+        }
+        
+        @media (max-width: 768px) {
+          .mobile-menu {
+            right: 1rem;
+            width: calc(100% - 2rem);
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .logo-text {
+            font-size: 1.3rem;
           }
           
-          nav {
-            padding: 16px 1.8rem;
+          .logo-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
           }
           
-          .mobile-nav-link:hover,
-          .mobile-dropdown-item:hover {
-            color: #FF9933;
-            transform: translateX(5px);
-          }
-          
-          .mobile-aqi-badge:hover,
-          .mobile-location-badge:hover {
-            background: rgba(255, 153, 51, 0.1);
-          }
-          
-          .location-badge {
-            display: none;
+          .mobile-menu {
+            top: 4.5rem;
           }
         }
         
         /* Smooth transitions for all interactive elements */
-        a, button, .dropdown, .hamburger, .logo-box, .aqi-badge, .dropdown-trigger, .ranking-card, .location-badge {
+        a, button, .dropdown, .hamburger, .logo-box, .aqi-badge, .dropdown-trigger, .ranking-card {
           transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
+          
       `}</style>
     </div>
   );
