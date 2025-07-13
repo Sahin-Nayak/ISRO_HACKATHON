@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { HeatmapLayer } from 'react-leaflet-heatmap-layer-v3';
+// import { HeatmapLayer } from 'react-leaflet-heatmap-layer-v3';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -423,7 +423,7 @@ const AirPollutionLive = () => {
           <button 
             className={`map-mode-button ${mapMode === 'heatmap' ? 'active' : ''}`}
             onClick={() => setMapMode('heatmap')}
-          >
+           hidden >
             Heatmap View
           </button>
           <button 
