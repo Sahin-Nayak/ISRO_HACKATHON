@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import AQITables from './pages/AQITables';
 import AQITables2 from './pages/AQITables2';
 import AirPrevData from './pages/AirPrevData';
+import HealthAdvicePanel from './components/HealthAdvicePanel';
 import {BrowserRouter, Routes,Route} from "react-router-dom"
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
     <>
       <Navbar />
       <AQIBot />
+      <HealthAdvicePanel />
       {/* <BrowserRouter> */}
       <Routes>
         <Route path="/" element={<Dashboard />} />

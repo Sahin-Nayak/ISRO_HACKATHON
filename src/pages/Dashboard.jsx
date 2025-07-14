@@ -8,6 +8,7 @@ import AirPollutionLiveBySearch from '../components/AirPollutionLiveBySearch';
 import AirPollutionLive from '../components/AirPollutionLive';
 import AQITable1 from '../components/AQITable1';
 import AQITable2 from '../components/AQITable2';
+import HealthAdvicePanel from '../components/HealthAdvicePanel';
 
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -43,7 +44,7 @@ const Dashboard = () => {
       <AQIDashboardUser/>
       <AirPollutionLiveBySearch/>
       <AirPollutionLive />
-      
+      <HealthAdvicePanel />
       {/* Floating Tab Bar */}
       <div style={{
         position: 'sticky',

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-// import { HeatmapLayer } from 'react-leaflet-heatmap-layer-v3';
+import 'leaflet.heat';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -161,13 +161,14 @@ const AirPollutionLive = () => {
   const [graphData, setGraphData] = useState(null);
   const [mapMode, setMapMode] = useState('stations');
   const mapRef = useRef(null);
+  const heatmapLayerRef = useRef(null);
 
   // Prepare heatmap data
-  const heatmapData = stations.map(station => ({
-    lat: station.city.geo[0],
-    lng: station.city.geo[1],
-    intensity: station.aqi === '-' ? 0 : parseInt(station.aqi)
-  }));
+  const heatmapData = stations.map(station => [
+    station.city.geo[0],
+    station.city.geo[1],
+    station.aqi === '-' ? 0 : parseInt(station.aqi)
+  ]);
 
   // Prepare graph view data
   const graphViewData = {
@@ -358,6 +359,41 @@ const AirPollutionLive = () => {
     fetchHistoricalData();
   }, [selectedStation]);
 
+  // Update heatmap layer when data or mode changes
+  useEffect(() => {
+    if (mapMode === 'heatmap' && mapRef.current && heatmapData.length > 0) {
+      if (heatmapLayerRef.current) {
+        mapRef.current.removeLayer(heatmapLayerRef.current);
+      }
+      
+      const heatmapLayer = L.heatLayer(heatmapData, {
+        radius: 20,
+        maxZoom: 15,
+        max: 300,
+        minOpacity: 0.5,
+        gradient: {
+          0.1: '#4CAF50',  // Good
+          0.3: '#FFC107',  // Moderate
+          0.5: '#FF9800',  // Unhealthy for Sensitive Groups
+          0.7: '#F44336',  // Unhealthy
+          0.9: '#9C27B0',  // Very Unhealthy
+          1.0: '#880E4F'   // Hazardous
+        }
+      }).addTo(mapRef.current);
+      
+      heatmapLayerRef.current = heatmapLayer;
+    } else if (heatmapLayerRef.current) {
+      mapRef.current.removeLayer(heatmapLayerRef.current);
+      heatmapLayerRef.current = null;
+    }
+
+    return () => {
+      if (heatmapLayerRef.current && mapRef.current) {
+        mapRef.current.removeLayer(heatmapLayerRef.current);
+      }
+    };
+  }, [mapMode, heatmapData]);
+
   // Prepare graph data from historical observations
   const prepareGraphData = (observations) => {
     if (!observations || !observations.iaqi) return;
@@ -423,7 +459,7 @@ const AirPollutionLive = () => {
           <button 
             className={`map-mode-button ${mapMode === 'heatmap' ? 'active' : ''}`}
             onClick={() => setMapMode('heatmap')}
-           hidden >
+            hidden >
             Heatmap View
           </button>
           <button 
@@ -488,29 +524,6 @@ const AirPollutionLive = () => {
                   </Popup>
                 </Marker>
               ))}
-
-              {mapMode === 'heatmap' && (
-                <HeatmapLayer
-                  fitBoundsOnLoad
-                  fitBoundsOnUpdate
-                  points={heatmapData}
-                  longitudeExtractor={point => point.lng}
-                  latitudeExtractor={point => point.lat}
-                  intensityExtractor={point => point.intensity}
-                  radius={20}
-                  max={300}
-                  minOpacity={0.5}
-                  useLocalExtrema={false}
-                  gradient={{
-                    0.1: '#4CAF50',  // Good
-                    0.3: '#FFC107',  // Moderate
-                    0.5: '#FF9800',  // Unhealthy for Sensitive Groups
-                    0.7: '#F44336',  // Unhealthy
-                    0.9: '#9C27B0',  // Very Unhealthy
-                    1.0: '#880E4F'   // Hazardous
-                  }}
-                />
-              )}
               
               <ZoomControl position="bottomright" />
             </MapContainer>
