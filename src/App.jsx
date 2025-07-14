@@ -5,6 +5,7 @@ import AQITables from './pages/AQITables';
 import AQITables2 from './pages/AQITables2';
 import AirPrevData from './pages/AirPrevData';
 import HealthAdvicePanel from './components/HealthAdvicePanel';
+import Footer from './components/Footer';
 import {BrowserRouter, Routes,Route} from "react-router-dom"
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/AirPrevData" element={<AirPrevData />} />
         {/* Add more routes as needed */}
       </Routes>
+      <Footer />
       {/* </BrowserRouter> */}
     </>
   );

@@ -17053,10 +17053,10 @@ const IndiaAQIMap = () => {
         </div>
       </div>
          
-      <footer style={styles.footer}>
+      {/* <footer style={styles.footer}>
         <p>Data updated hourly • Last refresh: {new Date().toLocaleString()}</p>
         <p style={{ marginTop: '8px' }}>© {new Date().getFullYear()} India Air Quality Monitoring System</p>
-      </footer>
+      </footer> */}
     </div>
   );
 };

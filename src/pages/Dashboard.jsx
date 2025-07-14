@@ -141,17 +141,7 @@ const Dashboard = () => {
         {activeTable === 'AQI' ? <AQITable1 /> : <AQITable2 />}
       </div>
 
-      <footer style={{
-        textAlign: 'center',
-        marginTop: '60px',
-        paddingTop: '20px',
-        borderTop: '1px solid #334155',
-        color: '#64748b',
-        fontSize: '0.9rem'
-      }}>
-        <p>Data updated hourly • Last refresh: {new Date().toLocaleString()}</p>
-        <p style={{ marginTop: '8px' }}>© {new Date().getFullYear()} India Air Quality Monitoring System</p>
-      </footer>
+     
     </div>
   );
 };
