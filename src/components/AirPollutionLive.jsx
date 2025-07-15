@@ -459,7 +459,7 @@ const AirPollutionLive = () => {
           <button 
             className={`map-mode-button ${mapMode === 'heatmap' ? 'active' : ''}`}
             onClick={() => setMapMode('heatmap')}
-            hidden >
+             hidden >
             Heatmap View
           </button>
           <button 
