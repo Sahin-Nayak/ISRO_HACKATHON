@@ -6,8 +6,8 @@ import AirQualitySearch from '../components/AirQualitySearch';
 const AirPrevData = () => {
     return (
         <div>
-            <AirQualitySearch />
             <IndiaAQIMap />
+            <AirQualitySearch />
         </div>
     );
 };
